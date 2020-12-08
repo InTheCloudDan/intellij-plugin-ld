@@ -17,17 +17,8 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
         val flag: FeatureFlag? = getFlags.flags.items.find { it.key == element.text.drop(1).dropLast(1) }
 
         if (flag != null) {
-            return try {
-                val settings = LaunchDarklyMergedSettings.getInstance(element.project)
-                val returnUrl = settings.baseUri + flag.environments[settings.environment]!!.site.href
-                println(returnUrl)
-                listOf(returnUrl)
-
-            } catch (err: Exception) {
-                println(err)
-                listOf("")
-            }
-            return listOf("")
+            val settings = LaunchDarklyMergedSettings.getInstance(element.project)
+            return listOf("${settings.baseUri.removePrefix("https://")}${flag.environments[settings.environment]!!.site.href}")
         }
 
         return null
@@ -38,7 +29,6 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
             return null
         }
         val getFlags = element.project.service<FlagStore>()
-        val settings = LaunchDarklyMergedSettings.getInstance(element.project)
 
         val flag: FeatureFlag? = getFlags.flags.items.find { it.key == element.text.drop(1).dropLast(1) }
         if (flag != null) {
@@ -91,7 +81,7 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
                 if (it.name != "" && it.name != null) {
                     variationOut += " ◆ ${it.name}"
                 }
-                variationOut += " ◆ ${if (rolloutPercentage != null && rolloutPercentage != -1.000) "Rollout $rolloutPercentage% ◆ " else ""}<code>Return value:</code> <code>${it.value}</code>"
+                variationOut += " ◆ ${if (rolloutPercentage != null && rolloutPercentage != -1.000) "Rollout $rolloutPercentage% ◆ " else ""}<code>Return value:</code> <code>${it.value}</code><br />"
                 result.append(variationOut)
                 if (env.offVariation != null && env.offVariation == i) {
                     result.append("<p><b>Off Variation</b></p>")
