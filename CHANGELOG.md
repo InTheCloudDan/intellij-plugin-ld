@@ -7,7 +7,7 @@
 - External Documentation override
 
 ### Added
-- External link for in hovers
+- External link inside of DocumentationHover
 
 ## [0.1.9-alpha]
 ### Removed
