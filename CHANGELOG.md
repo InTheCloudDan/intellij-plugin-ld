@@ -2,6 +2,13 @@
 
 # intellij-plugin-ld Changelog
 
+## [0.1.10-alpha]
+### Removed
+- External Documentation override
+
+### Added
+- External link for in hovers
+
 ## [0.1.9-alpha]
 ### Removed
 - Defaults from treeview
