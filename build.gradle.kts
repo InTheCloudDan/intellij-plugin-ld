@@ -128,8 +128,8 @@ tasks {
     publishPlugin {
         dependsOn("patchChangelog")
         token(System.getenv("PUBLISH_TOKEN"))
-        @Suppress("NonNullable")
-        channels(System.getenv("GIT_RELEASE").split('-').getOrElse(1) { "default" }.split('.').first())
+        channels(System.getenv("GIT_RELEASE")?.split('-')?.getOrElse(1) { "default" }?.split('.')?.first()
+                ?: "default")
     }
 
 }
