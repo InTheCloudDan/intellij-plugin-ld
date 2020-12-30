@@ -10,7 +10,7 @@ plugins {
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "1.3.72"
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "0.5.0"
+    id("org.jetbrains.intellij") version "0.6.5"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "0.6.0"
     // detekt linter - read more: https://detekt.github.io/detekt/kotlindsl.html
@@ -44,7 +44,8 @@ dependencies {
     implementation("com.launchdarkly:launchdarkly-java-server-sdk:5.+")
     implementation("com.google.code.gson:gson:2.7")
     implementation("com.googlecode.json-simple", "json-simple", "1.1.1")
-
+    implementation("com.github.doyaaaaaken:kotlin-csv-jvm:0.14.0")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.72")
     implementation("org.apache.logging.log4j", "log4j-slf4j-impl", "2.13.3")
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
     compileOnly(kotlin("stdlib-jdk8"))
@@ -63,11 +64,10 @@ intellij {
     //alternativeIdePath = "/Applications/GoLand.app"
     downloadSources = platformDownloadSources.toBoolean()
     updateSinceUntilBuild = true
-
 //  Plugin Dependencies:
 //  https://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_dependencies.html
 //
-    setPlugins("java", "org.jetbrains.plugins.go:202.6397.94") //201.6668.1.98
+    setPlugins("java") //201.6668.1.98
 }
 
 // Configure detekt plugin.
@@ -83,19 +83,19 @@ detekt {
 }
 
 tasks {
-    // Set the compatibility versions to 1.8
+    // Set the compatibility versions to 11
     withType<JavaCompile> {
-        sourceCompatibility = "1.8"
-        targetCompatibility = "1.8"
+        sourceCompatibility = "11"
+        targetCompatibility = "11"
     }
     listOf("compileKotlin", "compileTestKotlin").forEach {
         getByName<KotlinCompile>(it) {
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.jvmTarget = "11"
         }
     }
 
     withType<Detekt> {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     changelog {

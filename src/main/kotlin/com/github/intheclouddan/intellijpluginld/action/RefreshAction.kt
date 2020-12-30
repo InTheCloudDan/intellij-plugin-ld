@@ -46,7 +46,7 @@ class RefreshAction : AnAction {
         // Using the event, create and show a dialog
         val currentProject = event.project
         val flags = currentProject!!.service<FlagStore>()
-        flags.flagsNotify(rebuild = true)
+        flags.flagsNotify(reinit = true, rebuild = true)
     }
 
     /**

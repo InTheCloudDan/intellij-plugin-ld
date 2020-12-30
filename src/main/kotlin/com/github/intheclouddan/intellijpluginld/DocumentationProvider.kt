@@ -1,5 +1,6 @@
 package com.github.intheclouddan.intellijpluginld
 
+import com.github.intheclouddan.intellijpluginld.coderefs.FlagAliases
 import com.github.intheclouddan.intellijpluginld.featurestore.FlagConfiguration
 import com.github.intheclouddan.intellijpluginld.settings.LaunchDarklyMergedSettings
 import com.intellij.lang.documentation.AbstractDocumentationProvider
@@ -24,12 +25,18 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
 
     private fun getElementForDocumentation(contextElement: PsiElement?): PsiElement? {
         if (contextElement == null) return null
+<<<<<<< HEAD
         val getFlags = contextElement.project.service<FlagStore>()
 
         var flag: FeatureFlag? = getFlags.flags?.items?.find { it.key == contextElement.text.removeSurrounding("\"") }
         if (flag != null) {
             return contextElement
         }
+=======
+        val getAliases = contextElement.project.service<FlagAliases>()
+        val aliasFlag = getAliases.aliases[contextElement.text.removeSurrounding("\"")]
+        if (aliasFlag != null) return contextElement
+>>>>>>> 8031d5e... commit to rebase
         return contextElement?.parent
     }
 
@@ -42,9 +49,20 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
             return null
         }
         val getFlags = element.project.service<FlagStore>()
+        val getAliases = element.project.service<FlagAliases>()
         val settings = LaunchDarklyMergedSettings.getInstance(element.project)
 
         var flag: FeatureFlag? = getFlags.flags.items.find { it.key == element.text.removeSurrounding("\"") }
+<<<<<<< HEAD
+=======
+        println(element.text.removeSurrounding("\""))
+        var alias: String?
+        if (flag == null) {
+            alias = getAliases.aliases[element.text.removeSurrounding("\"")]
+            println("Alias!! $alias")
+            flag = getFlags.flags.items.find { it.key == alias }
+        }
+>>>>>>> 8031d5e... commit to rebase
         // TODO: gracefully handle API call working and Datastore being unavailable
         if (flag != null) {
             val env: FlagConfiguration = getFlags.flagConfigs[flag.key]
