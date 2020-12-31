@@ -13,7 +13,11 @@ import com.launchdarkly.api.model.FeatureFlag
 
 class LDDocumentationProvider : AbstractDocumentationProvider() {
     // Not sure how this is all working yet but it works for custom documentation in other IDEs than IDEA
-    override fun getCustomDocumentationElement(editor: Editor, file: PsiFile, contextElement: PsiElement?): PsiElement? {
+    override fun getCustomDocumentationElement(
+        editor: Editor,
+        file: PsiFile,
+        contextElement: PsiElement?
+    ): PsiElement? {
         if (contextElement == null) return null
 
         if (editor.caretModel.currentCaret.offset == contextElement.textRange.startOffset) {
@@ -25,18 +29,14 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
 
     private fun getElementForDocumentation(contextElement: PsiElement?): PsiElement? {
         if (contextElement == null) return null
-<<<<<<< HEAD
         val getFlags = contextElement.project.service<FlagStore>()
-
         var flag: FeatureFlag? = getFlags.flags?.items?.find { it.key == contextElement.text.removeSurrounding("\"") }
         if (flag != null) {
             return contextElement
         }
-=======
         val getAliases = contextElement.project.service<FlagAliases>()
         val aliasFlag = getAliases.aliases[contextElement.text.removeSurrounding("\"")]
         if (aliasFlag != null) return contextElement
->>>>>>> 8031d5e... commit to rebase
         return contextElement?.parent
     }
 
@@ -53,20 +53,15 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
         val settings = LaunchDarklyMergedSettings.getInstance(element.project)
 
         var flag: FeatureFlag? = getFlags.flags.items.find { it.key == element.text.removeSurrounding("\"") }
-<<<<<<< HEAD
-=======
-        println(element.text.removeSurrounding("\""))
         var alias: String?
         if (flag == null) {
             alias = getAliases.aliases[element.text.removeSurrounding("\"")]
-            println("Alias!! $alias")
             flag = getFlags.flags.items.find { it.key == alias }
         }
->>>>>>> 8031d5e... commit to rebase
         // TODO: gracefully handle API call working and Datastore being unavailable
         if (flag != null) {
             val env: FlagConfiguration = getFlags.flagConfigs[flag.key]
-                    ?: FlagConfiguration(flag.key, null, null, listOf(), listOf(), arrayOf(), false, -1)
+                ?: FlagConfiguration(flag.key, null, null, listOf(), listOf(), arrayOf(), false, -1)
             val result = StringBuilder()
             val prereqs = if (env.prerequisites.isNotEmpty()) {
                 "<b>Prerequisites</b> ${env.prerequisites.size} • "

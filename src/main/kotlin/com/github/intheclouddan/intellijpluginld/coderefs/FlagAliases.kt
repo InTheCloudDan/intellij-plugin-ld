@@ -10,42 +10,34 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
+import com.intellij.util.concurrency.AppExecutorUtil
 import java.io.File
 import java.nio.charset.Charset
+import java.util.concurrent.TimeUnit
 
 @Service
 class FlagAliases(private var project: Project) {
     var aliases = mutableMapOf<String, String>()
     val cr = CodeRefs()
-    //lateinit var aliasMap: Map<String, List<String>>
-//    val getAliases = ProjectManager.getInstance()
-//    val stuff = getAliases.
-    //project.service<FlagAliases>()
-    //val projectService = project.service<MyProjectService>()
-
+    val settings = LaunchDarklyMergedSettings.getInstance(project)
 
     fun readAliases(file: File) {
-        println(file)
         //val rows: List<Map<String, String>> =
         csvReader().open(file) {
             readAllWithHeaderAsSequence().forEach { row: Map<String, String> ->
-                //Do something
-                println(row)
-                println(row["aliases"])
                 if (row["aliases"] !== "") {
                     //aliases.set(row["aliases"], row["flagKey"])
                     aliases[row["aliases"]!!] = row["flagKey"]!!
                 }
             }
         }
-        println(aliases)
     }
 
     fun runCodeRefs(project: Project) {
         try {
             val settings = LaunchDarklyMergedSettings.getInstance(project)
-            val tmpDir = File(PathManager.getPluginTempPath())
-            Thread.sleep(25000)
+            val tmpDir = File(PathManager.getTempPath())
+
             val cmds = ArrayList<String>()
             val aliasesPath = File(project.basePath + "/.launchdarkly/coderefs.yaml")
             println("Alias path ${aliasesPath.exists()}")
@@ -70,12 +62,16 @@ class FlagAliases(private var project: Project) {
             try {
                 val processHandler: ProcessHandler = OSProcessHandler(generalCommandLine)
                 processHandler.startNotify()
-                processHandler.waitFor()
+                var completed = processHandler.waitFor()
+                while (completed) {
+                    val aliasPath =
+                        File(PathManager.getTempPath() + "/coderefs_${settings.project}_${project.name}_scan.csv")
+                    readAliases(aliasPath)
+                    break
+                }
             } catch (exception: ExecutionException) {
                 println(exception)
             }
-            val aliasPath = File(PathManager.getPluginTempPath() + "/coderefs_${settings.project}_${project.name}_scan.csv")
-            readAliases(aliasPath)
 
         } catch (err: Exception) {
             println(err)
@@ -90,9 +86,7 @@ class FlagAliases(private var project: Project) {
             val binDir = File("${cr.codeRefsPath}")
             try {
                 binDir.deleteRecursively()
-                ApplicationManager.getApplication().executeOnPooledThread {
-                    cr.downloadCodeRefs()
-                }
+                cr.downloadCodeRefs()
             } catch (err: Exception) {
                 println(err)
                 return false
@@ -102,11 +96,18 @@ class FlagAliases(private var project: Project) {
     }
 
     init {
-        val runnerCheck = checkCodeRefs()
-        if (runnerCheck) {
-            ApplicationManager.getApplication().executeOnPooledThread {
-                runCodeRefs(project)
-            }
+        if (settings.codeReferences) {
+            AppExecutorUtil.getAppScheduledExecutorService().scheduleWithFixedDelay(
+                Runnable {
+                    val runnerCheck = checkCodeRefs()
+                    if (runnerCheck) {
+                        ApplicationManager.getApplication().executeOnPooledThread {
+                            runCodeRefs(project)
+                        }
+                    }
+                },
+                0, settings.codeReferencesRefreshRate.toLong(), TimeUnit.MINUTES
+            )
         }
     }
 }
