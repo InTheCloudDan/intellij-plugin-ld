@@ -18,7 +18,7 @@ import com.launchdarkly.api.model.FeatureFlag
 import java.awt.Color
 
 @Suppress("UnstableApiUsage")
-class LDHintCollector(editor: Editor, private val settings: HintSettings) : InlayHintsCollector {
+class LDHintCollector(editor: Editor) : InlayHintsCollector {
     private val factory = PresentationFactory(editor as EditorImpl)
 
     private val colorValidatedGreen: Color
@@ -39,6 +39,10 @@ class LDHintCollector(editor: Editor, private val settings: HintSettings) : Inla
 //            is PsiIdentifier -> element.text
 //            else -> null
 //        }
+//        if (settings.showHints == false) {
+//            return false
+//        }
+        println("collecting")
         val getFlags = element.project.service<FlagStore>()
         val getAliases = element.project.service<FlagAliases>()
         //val settings = LaunchDarklyMergedSettings.getInstance(element.project)
@@ -61,7 +65,7 @@ class LDHintCollector(editor: Editor, private val settings: HintSettings) : Inla
         sink.addInlineElement(
             element.endOffset,
             relatesToPrecedingText = true,
-            presentation = InsetPresentation(hint, top = 3 /* TODO */, left = 1, right = 1),
+            presentation = InsetPresentation(hint, top = 3, left = 1, right = 1),
             true
         )
         //}
