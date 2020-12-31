@@ -39,7 +39,8 @@
                                implementation="com.github.intheclouddan.intellijpluginld.LDDocumentationProvider"/>
         <!--        <configurationType-->
         <!--                implementation="com.github.intheclouddan.intellijpluginld.coderefs.CodeRefsRunConfigurationType"/>-->
-
+        <codeInsight.inlayProvider factoryClass="com.github.intheclouddan.intellijpluginld.hints.LDHintsProviderFactory"
+                                   implementationClass="com.github.intheclouddan.intellijpluginld.hints.LDHintsProvider"/>
     </extensions>
 
     <actions>
