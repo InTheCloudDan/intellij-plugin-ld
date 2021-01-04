@@ -40,7 +40,6 @@ class FlagAliases(private var project: Project) {
 
             val cmds = ArrayList<String>()
             val aliasesPath = File(project.basePath + "/.launchdarkly/coderefs.yaml")
-            println("Alias path ${aliasesPath.exists()}")
             if (!aliasesPath.exists()) {
                 return
             }
