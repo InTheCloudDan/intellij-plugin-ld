@@ -10,7 +10,7 @@ plugins {
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "1.3.72"
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "0.5.0"
+    id("org.jetbrains.intellij") version "0.6.5"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "0.6.0"
     // detekt linter - read more: https://detekt.github.io/detekt/kotlindsl.html
@@ -45,7 +45,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.7")
     implementation("com.googlecode.json-simple", "json-simple", "1.1.1")
     implementation("com.github.doyaaaaaken:kotlin-csv-jvm:0.14.0")
-    //implementation("org.jetbrains.kotlin:kotlin-reflect:1.4.20")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.72")
     implementation("org.apache.logging.log4j", "log4j-slf4j-impl", "2.13.3")
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
     compileOnly(kotlin("stdlib-jdk8"))
