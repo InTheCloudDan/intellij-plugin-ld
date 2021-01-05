@@ -11,7 +11,6 @@
 # - GitHub Actions: https://help.github.com/en/actions
 # - IntelliJ Plugin Verifier GitHub Action: https://github.com/ChrisCarini/intellij-platform-plugin-verifier-action
 #
-## JBIJPPTPL
 
 name: Build
 on: [ push, pull_request ]
@@ -49,13 +48,13 @@ jobs:
         with:
           java-version: 1.8
 
-      # Cache Gradle dependencies
-      #      - name: Setup Cache
-      #        uses: actions/cache@v1
-      #        with:
-      #          path: ~/.gradle/caches
-      #          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-      #          restore-keys: ${{ runner.os }}-gradle-
+            # Cache Gradle dependencies
+            - name: Setup Cache
+              uses: actions/cache@v1
+              with:
+                path: ~/.gradle/caches
+                key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+                restore-keys: ${{ runner.os }}-gradle-
 
       # Run detekt
       - name: Run Linter
@@ -66,8 +65,8 @@ jobs:
         run: ./gradlew verifyPlugin
 
       # Run test Gradle task
-      #- name: Run Tests
-      #  run: ./gradlew test
+      - name: Run Tests
+        run: ./gradlew test
 
   # Build plugin with buildPlugin Gradle task and provide the artifact for the next workflow jobs
   # Requires test job to be passed
@@ -92,13 +91,13 @@ jobs:
         with:
           java-version: 1.8
 
-      #      # Cache Gradle dependencies
-      #      - name: Setup Cache
-      #        uses: actions/cache@v1
-      #        with:
-      #          path: ~/.gradle/caches
-      #          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-      #          restore-keys: ${{ runner.os }}-gradle-
+            # Cache Gradle dependencies
+            - name: Setup Cache
+              uses: actions/cache@v1
+              with:
+                path: ~/.gradle/caches
+                key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+                restore-keys: ${{ runner.os }}-gradle-
 
       # Set environment variables
       - name: Export Properties
