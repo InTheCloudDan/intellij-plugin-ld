@@ -175,8 +175,6 @@ class LaunchDarklyApplicationConfigurable : BoundConfigurable(displayName = "Lau
     override fun isModified(): Boolean {
         if ((settings.authorization != origApiKey || settings.baseUri != origBaseUri) && apiUpdate) {
             try {
-                println(settings.baseUri)
-                println(settings.authorization)
                 projectContainer = getProjects(settings.authorization, settings.baseUri)
                 with(projectBox) {
                     removeAllElements()
@@ -216,8 +214,6 @@ class LaunchDarklyApplicationConfigurable : BoundConfigurable(displayName = "Lau
 
         if (::projectBox.isInitialized) {
             if (settings.project != projectBox.selectedItem.toString()) {
-                println(settings.project)
-                println(projectBox.selectedItem.toString())
                 modified = true
             }
         }
