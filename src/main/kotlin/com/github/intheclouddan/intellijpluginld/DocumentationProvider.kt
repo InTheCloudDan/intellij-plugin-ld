@@ -16,7 +16,8 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
     override fun getCustomDocumentationElement(
         editor: Editor,
         file: PsiFile,
-        contextElement: PsiElement?
+        contextElement: PsiElement?,
+        offset: Int
     ): PsiElement? {
         if (contextElement == null) return null
 
