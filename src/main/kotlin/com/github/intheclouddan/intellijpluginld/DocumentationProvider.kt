@@ -31,7 +31,8 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
     private fun getElementForDocumentation(contextElement: PsiElement?): PsiElement? {
         if (contextElement == null) return null
         val getFlags = contextElement.project.service<FlagStore>()
-        var flag: FeatureFlag? = getFlags.flags?.items?.find { it.key == contextElement.text.removeSurrounding("\"") }
+        var flag: FeatureFlag? =
+            getFlags.flags?.items?.find { contextElement.text.contains(it.key) }
         if (flag != null) {
             return contextElement
         }
@@ -53,7 +54,8 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
         val getAliases = element.project.service<FlagAliases>()
         val settings = LaunchDarklyMergedSettings.getInstance(element.project)
 
-        var flag: FeatureFlag? = getFlags.flags.items.find { it.key == element.text.removeSurrounding("\"") }
+        var flag: FeatureFlag? =
+            getFlags.flags?.items?.find { element.text.contains(it.key) }
         var alias: String?
         if (flag == null) {
             alias = getAliases.aliases[element.text.removeSurrounding("\"")]
