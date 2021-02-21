@@ -31,6 +31,7 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
     private fun getElementForDocumentation(contextElement: PsiElement?): PsiElement? {
         if (contextElement == null) return null
         val getFlags = contextElement.project.service<FlagStore>()
+
         var flag: FeatureFlag? =
             getFlags.flags?.items?.find { contextElement.text.contains(it.key) }
         if (flag != null) {

@@ -136,7 +136,7 @@ class FlagStore(private var project: Project) {
         project.service<FlagAliases>()
         if (settings.project != "" && settings.authorization != "") {
             ApplicationManager.getApplication().executeOnPooledThread {
-                flags = flagsNotify()
+                flags = flagsNotify(reinit = true)
                 try {
                     val ldProject =
                         LaunchDarklyApiClient.projectInstance(project, settings.authorization)
