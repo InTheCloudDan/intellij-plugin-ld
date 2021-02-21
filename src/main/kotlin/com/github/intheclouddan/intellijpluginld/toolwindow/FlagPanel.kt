@@ -5,8 +5,6 @@ import com.github.intheclouddan.intellijpluginld.action.*
 import com.github.intheclouddan.intellijpluginld.messaging.FlagNotifier
 import com.github.intheclouddan.intellijpluginld.messaging.MessageBusService
 import com.github.intheclouddan.intellijpluginld.settings.LaunchDarklyMergedSettings
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionPlaces
@@ -37,12 +35,14 @@ private const val SPLITTER_PROPERTY = "BuildAttribution.Splitter.Proportion"
 /*
  * FlagPanel renders the ToolWindow Flag Treeview and associated action buttons.
  */
-class FlagPanel(private val myProject: Project, messageBusService: MessageBusService) : SimpleToolWindowPanel(false, false), Disposable {
+class FlagPanel(private val myProject: Project, messageBusService: MessageBusService) :
+    SimpleToolWindowPanel(false, false), Disposable {
     private val settings = LaunchDarklyMergedSettings.getInstance(myProject)
     private var getFlags = myProject.service<FlagStore>()
     private var root = RootNode(getFlags.flags, settings, myProject)
     private var treeStructure = createTreeStructure()
     private var treeModel = StructureTreeModel(treeStructure, this)
+    private var builtOffline = false
     lateinit var tree: Tree
 
     private fun createTreeStructure(): SimpleTreeStructure {
@@ -100,17 +100,17 @@ class FlagPanel(private val myProject: Project, messageBusService: MessageBusSer
 
 
         PopupHandler.installPopupHandler(
-                tree,
-                actionPopup.apply {
-                    add(refreshAction)
-                    add(copyKeyAction)
-                    add(toggleFlagAction)
-                    add(openBrowserAction)
-                    add(changeFallthroughAction)
-                    add(changeOffVariationAction)
-                },
-                ActionPlaces.POPUP,
-                ActionManager.getInstance()
+            tree,
+            actionPopup.apply {
+                add(refreshAction)
+                add(copyKeyAction)
+                add(toggleFlagAction)
+                add(openBrowserAction)
+                add(changeFallthroughAction)
+                add(changeOffVariationAction)
+            },
+            ActionPlaces.POPUP,
+            ActionManager.getInstance()
         )
     }
 
@@ -156,6 +156,9 @@ class FlagPanel(private val myProject: Project, messageBusService: MessageBusSer
     fun updateNodes() {
         var getFlags = myProject.service<FlagStore>()
         try {
+            if (getFlags.flagConfigs.isEmpty()) {
+                builtOffline = true
+            }
             val defaultTree = tree.model as AsyncTreeModel
             if (defaultTree.root != null) {
                 val root = defaultTree.root as DefaultMutableTreeNode
@@ -174,7 +177,7 @@ class FlagPanel(private val myProject: Project, messageBusService: MessageBusSer
                                 treeModel.invalidate(TreePath(parent), true)
                                 break
                             }
-                            if (parentNode.key == flag.key) {
+                            if (parentNode.key == flag.key) { // Check to not have to update whole treeview for update. May not be needed
                                 found = true
                                 break
                             }
@@ -205,43 +208,50 @@ class FlagPanel(private val myProject: Project, messageBusService: MessageBusSer
         }
         try {
             myProject.messageBus.connect().subscribe(messageBusService.flagsUpdatedTopic,
-                    object : FlagNotifier {
-                        override fun notify(isConfigured: Boolean, flag: String, rebuild: Boolean) {
-                            if (isConfigured) {
-                                if (start) {
-                                    tree = start()
-                                    actions(tree)
-                                }
-                                when {
-                                    flag != "" -> {
-                                        ApplicationManager.getApplication().executeOnPooledThread {
-                                            updateNode(flag)
-                                        }
-                                    }
-                                    rebuild -> {
-                                        ApplicationManager.getApplication().executeOnPooledThread {
-                                            updateNodes()
-                                        }
-                                    }
-                                    else -> {
-                                        start()
-                                    }
-                                }
-                            } else {
-                                val notification = Notification("ProjectOpenNotification", "LaunchDarkly",
-                                        String.format("LaunchDarkly Plugin is not configured"), NotificationType.WARNING)
-                                notification.notify(myProject)
-                            }
-                        }
-
-                        override fun reinit() {
+                object : FlagNotifier {
+                    override fun notify(isConfigured: Boolean, flag: String, rebuild: Boolean) {
+                        if (isConfigured) {
                             if (start) {
                                 tree = start()
                                 actions(tree)
                             }
-                            updateNodeInfo()
+                            when {
+                                flag != "" -> {
+                                    ApplicationManager.getApplication().executeOnPooledThread {
+                                        if (!builtOffline) {
+                                            updateNodes()
+                                        } else {
+                                            updateNode(flag)
+                                        }
+                                    }
+                                }
+                                rebuild -> {
+                                    ApplicationManager.getApplication().executeOnPooledThread {
+                                        updateNodes()
+                                    }
+                                }
+                                else -> {
+                                    start()
+                                }
+                            }
+                        } else {
+//                            val notification = Notification(
+//                                "ProjectOpenNotification", "LaunchDarkly",
+//                                String.format("LaunchDarkly Plugin is not configured"), NotificationType.WARNING
+//                            )
+//                            notification.notify(myProject)
                         }
-                    })
+                    }
+
+                    override fun reinit() {
+                        if (start) {
+                            tree = start()
+                            actions(tree)
+                        }
+                        updateNodeInfo()
+                        updateNodes()
+                    }
+                })
         } catch (err: Error) {
             println(err)
             println("something went wrong")

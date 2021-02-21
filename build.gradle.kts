@@ -59,10 +59,10 @@ tasks.withType<Test> {
 // Read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
     pluginName = pluginName
-    version = platformVersion
-    type = platformType
-    //alternativeIdePath = "/Applications/GoLand.app"
-    downloadSources = platformDownloadSources.toBoolean()
+    //version = platformVersion
+    //type = platformType
+    alternativeIdePath = "/Applications/WebStorm.app"
+    //downloadSources = platformDownloadSources.toBoolean()
     updateSinceUntilBuild = true
 //  Plugin Dependencies:
 //  https://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_dependencies.html

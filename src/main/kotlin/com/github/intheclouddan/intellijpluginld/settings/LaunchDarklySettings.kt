@@ -193,6 +193,11 @@ class LaunchDarklyConfigurable(private val project: Project) : BoundConfigurable
     }
 
     override fun isModified(): Boolean {
+        println("Orig Key: $origApiKey")
+        println("Current Key: ${settings.authorization}")
+        println("orig Base: $origBaseUri")
+        println("new Base: ${settings.baseUri}")
+        println(!apiUpdate)
         if ((settings.authorization != origApiKey || settings.baseUri != origBaseUri && !apiUpdate)) {
             try {
                 if (settings.credName != project.name) settings.credName = project.name
