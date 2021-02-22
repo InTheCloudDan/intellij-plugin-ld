@@ -6,6 +6,8 @@ import com.github.intheclouddan.intellijpluginld.settings.LaunchDarklyMergedSett
 import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.openapi.components.service
 import com.intellij.openapi.editor.Editor
+import com.intellij.patterns.PlatformPatterns
+import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
@@ -29,7 +31,11 @@ class LDDocumentationProvider : AbstractDocumentationProvider() {
     }
 
     private fun getElementForDocumentation(contextElement: PsiElement?): PsiElement? {
-        if (contextElement == null) return null
+        if (contextElement == null || contextElement == StandardPatterns.not(
+                PlatformPatterns.psiElement().notEmpty()
+            )
+        ) return null
+
         val getFlags = contextElement.project.service<FlagStore>()
 
         var flag: FeatureFlag? =

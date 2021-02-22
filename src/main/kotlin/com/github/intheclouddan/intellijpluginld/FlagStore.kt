@@ -23,8 +23,10 @@ import com.launchdarkly.api.model.FeatureFlags
 import com.launchdarkly.sdk.server.DataModel
 import com.launchdarkly.sdk.server.LDClient
 import com.launchdarkly.sdk.server.LDConfig
+import com.launchdarkly.sdk.server.interfaces.DataSourceStatusProvider
 import com.launchdarkly.sdk.server.interfaces.DataStore
 import com.launchdarkly.sdk.server.interfaces.FlagChangeListener
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 
@@ -130,27 +132,46 @@ class FlagStore(private var project: Project) {
         flagClient = client
     }
 
+    fun setupStore() {
+        val ldProject =
+            LaunchDarklyApiClient.projectInstance(project, settings.authorization)
+                .getProject(settings.project)
+        val myStreamBaseURI = settings.baseUri.replace("app", "stream")
+        val (store, client) = createClientAndGetStore(
+            ldProject.environments.find { it.key == settings.environment }!!.apiKey,
+            myStreamBaseURI
+        )
+        flagStore = store!!
+        flagClient = client
+        val clientInit = flagClient.dataSourceStatusProvider.waitFor(
+            DataSourceStatusProvider.State.VALID,
+            Duration.ofMillis(1000)
+        )
+        if (clientInit) {
+            println(flagClient.isInitialized)
+            flagTargeting(store)
+            flagListener(client, store)
+            flags = flagsNotify(reinit = true, rebuild = true)
+
+        } else {
+            println(flagClient.isInitialized)
+            // We still want to init, FlagTree will be built without SDK data.
+            flagTargeting(store)
+            flagListener(client, store)
+            flags = flagsNotify(reinit = true, rebuild = true)
+
+        }
+    }
+
     init {
         val settings = LaunchDarklyMergedSettings.getInstance(project)
         val refreshRate: Long = settings.refreshRate.toLong()
         project.service<FlagAliases>()
         if (settings.project != "" && settings.authorization != "") {
             ApplicationManager.getApplication().executeOnPooledThread {
-                flags = flagsNotify(reinit = true)
                 try {
-                    val ldProject =
-                        LaunchDarklyApiClient.projectInstance(project, settings.authorization)
-                            .getProject(settings.project)
-                    val myStreamBaseURI = settings.baseUri.replace("app", "stream")
+                    setupStore()
 
-                    val (store, client) = createClientAndGetStore(
-                        ldProject.environments.find { it.key == settings.environment }!!.apiKey,
-                        myStreamBaseURI
-                    )
-                    flagStore = store!!
-                    flagClient = client
-                    flagTargeting(store)
-                    flagListener(client, store)
                 } catch (err: ApiException) {
                     val notify = ConfigNotifier()
                     notify.notify(project, "Project: ${settings.project} Error: $err")
@@ -169,19 +190,7 @@ class FlagStore(private var project: Project) {
                 override fun notify(isConfigured: Boolean) {
                     if (isConfigured && !settings.projectOverrides()) {
                         try {
-                            val curProject = LaunchDarklyApiClient.projectInstance(project, settings.authorization)
-                                .getProject(settings.project)
-                            val myStreamBaseURI = settings.baseUri.replace("app", "stream")
-                            val (curStore, curClient) = createClientAndGetStore(
-                                curProject.environments.find { it.key == settings.environment }!!.apiKey,
-                                myStreamBaseURI
-                            )
-                            flagClient.close()
-                            flagStore = curStore!!
-                            flagClient = curClient
-                            flagTargeting(curStore)
-                            flagListener(curClient, curStore)
-                            flags = flagsNotify(true)
+                            setupStore()
                         } catch (err: ApiException) {
                             val notify = ConfigNotifier()
                             notify.notify(project, err.toString())
@@ -194,19 +203,7 @@ class FlagStore(private var project: Project) {
             object : ConfigurationNotifier {
                 override fun notify(isConfigured: Boolean) {
                     if (isConfigured) {
-                        val curProject = LaunchDarklyApiClient.projectInstance(project, settings.authorization)
-                            .getProject(settings.project)
-                        val myStreamBaseURI = settings.baseUri.replace("app", "stream")
-                        val (curStore, curClient) = createClientAndGetStore(
-                            curProject.environments.find { it.key == settings.environment }!!.apiKey,
-                            myStreamBaseURI
-                        )
-                        flagClient.close()
-                        flagStore = curStore!!
-                        flagClient = curClient
-                        flagTargeting(curStore)
-                        flagListener(curClient, curStore)
-                        flags = flagsNotify(true)
+                        setupStore()
                     }
                 }
             })
