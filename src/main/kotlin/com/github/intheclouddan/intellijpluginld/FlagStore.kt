@@ -148,13 +148,10 @@ class FlagStore(private var project: Project) {
             Duration.ofMillis(1000)
         )
         if (clientInit) {
-            println(flagClient.isInitialized)
             flagTargeting(store)
             flagListener(client, store)
             flags = flagsNotify(reinit = true, rebuild = true)
-
         } else {
-            println(flagClient.isInitialized)
             // We still want to init, FlagTree will be built without SDK data.
             flagTargeting(store)
             flagListener(client, store)
