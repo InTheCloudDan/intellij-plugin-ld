@@ -48,7 +48,7 @@ dependencies {
     runtimeOnly("org.jetbrains.kotlin:kotlin-reflect:1.4.20-M2")
     implementation("org.apache.logging.log4j", "log4j-slf4j-impl", "2.13.3")
     testImplementation("org.junit.jupiter:junit-jupiter:5.6.0")
-    compileOnly(kotlin("stdlib-jdk8"))
+    //compileOnly(kotlin("stdlib-jdk8"))
 }
 
 tasks.withType<Test> {
