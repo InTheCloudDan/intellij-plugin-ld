@@ -20,7 +20,7 @@ jobs:
   # Run Gradle Wrapper Validation Action to verify the wrapper's checksum
   gradleValidation:
     name: Gradle Wrapper
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
 
       # Check out current repository
@@ -73,7 +73,7 @@ jobs:
   build:
     name: Build
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     outputs:
       name: ${{ steps.properties.outputs.name }}
       version: ${{ steps.properties.outputs.version }}
@@ -128,7 +128,7 @@ jobs:
   verify:
     name: Verify
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
 
       # Download plugin artifact provided by the previous job
@@ -162,7 +162,7 @@ jobs:
     name: Release Draft
     if: github.ref == 'refs/heads/master'
     needs: [ build, verify ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
 
       # Check out current repository
