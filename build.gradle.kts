@@ -10,11 +10,18 @@ plugins {
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "1.4.20-M2"
     // gradle-intellij-plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-    id("org.jetbrains.intellij") version "0.7.1"
+    id("org.jetbrains.intellij") version "0.8.0-SNAPSHOT"
     // gradle-changelog-plugin - read more: https://github.com/JetBrains/gradle-changelog-plugin
     id("org.jetbrains.changelog") version "0.6.0"
     // detekt linter - read more: https://detekt.github.io/detekt/kotlindsl.html
     id("io.gitlab.arturbosch.detekt") version "1.10.0-RC1"
+}
+
+buildscript {
+    dependencies {
+        classpath("org.jetbrains.intellij.plugins:structure-base:3.139")
+        classpath("org.jetbrains.intellij.plugins:structure-intellij:3.139")
+    }
 }
 
 // Import variables from gradle.properties file
